@@ -1,4 +1,4 @@
-# setup logging
+# # setup logging
 # import logging
 # logging.basicConfig()
 # log = logging.getLogger()
@@ -153,23 +153,23 @@ def decode_binary( input_payload, data_type, byte_order, word_order, num_bytes )
         return output
 
 # Connect to the PostgreSQL database and write an entry to the table
-# database name "a_database"
+# database name "b_database"
 # user = "postgres"
 # password = "password"
 # db location = LOCALHOST
-# table name = "plc_data"
+# table name = "table1"
 # 4 rows
 
 def write_to_database(data):
     try:
         # connect to database
-        conn = psycopg2.connect(dbname="a_database", user="postgres", password="password")
+        conn = psycopg2.connect(dbname="b_database", user="postgres", password="password")
 
         # creat cursor object
         cur = conn.cursor()
 
         # build statment
-        sql = 'INSERT INTO plc_data VALUES (%s, %s, %s, %s)'
+        sql = 'INSERT INTO table1 VALUES (%s, %s, %s, %s, %s)'
 
         # insert statment
         cur.execute(sql, (*data,))
@@ -201,7 +201,7 @@ def write_to_database(data):
 """ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% """
 
 # IP address(es)
-slave_ip = ["10.1.1.176"]
+slave_ip = ["192.168.1.5"]
 
 # read/write coil offset(s)
 # modbus addresses (0..1 - 0..9)
@@ -217,7 +217,7 @@ slave_read_register = [0]
 
 # read/write holding register offset(s)
 # modbus addresses (4..1 - 4..9)
-slave_rw_register = [0]
+slave_rw_register = [1700]
 
 
 # create the task scheduler and main task
@@ -226,10 +226,10 @@ try:
     while True:
 
         # Send the modbus command to the plc
-        response = read_input_registers(slave_ip[0], slave_rw_register[0], 0, 4)
+        response = read_holding_registers(slave_ip[0], slave_rw_register[0], 1, [0, 100])
 
         # decode the response if necessary
-        val = decode_binary(response, "int16", Endian.Big, Endian.Little, 4*2)
+        val = decode_binary(response, "int32", Endian.Big, Endian.Big, 2*2)
 
         # print the decoded response
         print("PLC data: ")
@@ -244,13 +244,3 @@ try:
 except KeyboardInterrupt:
     print("Closing...")
     pass
-
-    
-
-
-
-
-
-
-
-
